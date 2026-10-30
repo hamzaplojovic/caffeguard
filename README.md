@@ -23,10 +23,8 @@ That's it.
 
 ## How to use it
 
-1. Keep your Mac awake the way you normally do: `caffeinate`, Amphetamine, Raycast,
-   anything. Caffeguard notices on its own. Apps that keep the Mac awake for their own
-   reasons, like a video call or music, count too, because the Mac stays unlocked then
-   as well.
+1. Keep your Mac awake with one of the [keep-awake apps](#keep-awake-apps) below.
+   Caffeguard notices on its own.
 2. Walk away.
 3. After 5 minutes (you can change this) of nobody touching the Mac, the shield in the menu bar fills in. It is
    watching now.
@@ -59,8 +57,7 @@ Things to know:
 
 ## Keep-awake apps
 
-Caffeguard detects active macOS requests to prevent system or display sleep, so there
-is nothing to configure for each keep-awake app. These include:
+Caffeguard arms only while one of these apps keeps the Mac awake:
 
 - `caffeinate`, built into macOS.
 - [Amphetamine](https://apps.apple.com/app/amphetamine/id937984704).
@@ -69,11 +66,15 @@ is nothing to configure for each keep-awake app. These include:
 - [Theine](https://appahead.studio/apps/theine/).
 - [Caffeinated by Yugen](https://apps.apple.com/app/id1362171212).
 - [Raycast Coffee](https://www.raycast.com/mooxl/coffee).
+- Caffeine and Owly.
 
 Start a keep-awake session that prevents system or display sleep. KeepingYouAwake and
 Raycast Coffee use `caffeinate` underneath and are detected through that process.
-Paused or ended sessions do not count. Apps can be installed outside `/Applications`
-or run through helpers; their names and locations do not need to match a list.
+Paused or ended sessions do not count. The apps can be installed anywhere.
+
+Other apps that keep the Mac awake for their own reasons, like a browser playing a video,
+music or a video call, do not count. A coding agent that runs `caffeinate` while it works,
+like Claude Code, does count.
 
 For Raycast Coffee, enable **Prevent system sleep** or **Prevent display sleep**.
 Disk-only assertions and tools that only simulate mouse or keyboard input are not

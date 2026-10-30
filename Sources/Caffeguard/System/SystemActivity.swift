@@ -9,14 +9,15 @@ enum SystemActivity {
         "PreventUserIdleSystemSleep", "PreventUserIdleDisplaySleep", "PreventSystemSleep",
         "NoIdleSleepAssertion", "NoDisplaySleepAssertion",
     ]
-    /// macOS's own daemons hold keep-awake assertions routinely (powerd does whenever the
-    /// display is on), so only programs outside these folders count. /usr/bin, where
-    /// `caffeinate` lives, is deliberately not one of them.
-    private static let systemFolders = ["/System/Library/", "/usr/libexec/", "/usr/sbin/", "/Library/Apple/"]
+    /// Only these programs count, matched by executable name wherever they are installed.
+    /// Browsers, music and video calls hold the same assertions for their own reasons, so they
+    /// must not arm Caffeguard. KeepingYouAwake and Raycast's Coffee run `caffeinate`, which
+    /// owns their assertions, so they are covered by it.
+    static let keepAwakeTools: Set<String> = [
+        "caffeinate", "Amphetamine", "Lungo", "Theine", "Caffeinated", "Caffeine", "Owly",
+    ]
 
-    /// Detects active power assertions, including those owned by a wrapper's caffeinate child.
-    /// Supports Amphetamine, KeepingYouAwake, Lungo, Theine, Caffeinated and Raycast Coffee
-    /// without relying on an app's name or installation location.
+    /// True while one of `keepAwakeTools` actively keeps the Mac from idling to sleep.
     static var isKeptAwake: Bool {
         var byProcess: Unmanaged<CFDictionary>?
         guard IOPMCopyAssertionsByProcess(&byProcess) == kIOReturnSuccess,
@@ -41,7 +42,8 @@ enum SystemActivity {
               let level = assertion[kIOPMAssertionLevelKey] as? Int,
               level == kIOPMAssertionLevelOn,
               let processPath else { return false }
-        return keepAwakeTypes.contains(assertionType) && !systemFolders.contains { processPath.hasPrefix($0) }
+        return keepAwakeTypes.contains(assertionType)
+            && keepAwakeTools.contains(URL(filePath: processPath).lastPathComponent)
     }
 
     private static func processPath(_ pid: pid_t) -> String? {

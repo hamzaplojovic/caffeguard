@@ -28,10 +28,22 @@ struct KeepAwakeTests {
     @Test(arguments: [
         "/Users/owner/Applications/Lungo.app/Contents/MacOS/Lungo",
         "/Volumes/Tools/Theine.app/Contents/MacOS/Theine",
+        "/opt/homebrew/bin/caffeinate",
+    ])
+    func installationLocationDoesNotLimitSupport(path: String) {
+        #expect(SystemActivity.keepsMacAwake(assertion: assertion(), processPath: path))
+    }
+
+    // Apps that hold the same assertions for their own reasons must not arm the guard.
+    @Test(arguments: [
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "/Applications/Safari.app/Contents/MacOS/Safari",
+        "/Applications/Spotify.app/Contents/MacOS/Spotify",
+        "/Applications/zoom.us.app/Contents/MacOS/zoom.us",
         "/Applications/Renamed.app/Contents/MacOS/Helper",
     ])
-    func installationLocationAndProcessNameDoNotLimitSupport(path: String) {
-        #expect(SystemActivity.keepsMacAwake(assertion: assertion(), processPath: path))
+    func appsThatAreNotKeepAwakeToolsDoNotCount(path: String) {
+        #expect(!SystemActivity.keepsMacAwake(assertion: assertion(), processPath: path))
     }
 
     @Test(arguments: [
@@ -95,8 +107,9 @@ struct KeepAwakeTests {
             let snapshot = try #require(result?.takeRetainedValue() as? [NSNumber: [[String: Any]]])
             let ownPID = NSNumber(value: ProcessInfo.processInfo.processIdentifier)
             let ownAssertions = (snapshot[ownPID] ?? []).filter { $0[kIOPMAssertionNameKey] as? String == name }
+            // The test runner stands in for caffeinate, which owns the assertion in real use.
             return SystemActivity.isKeptAwake(assertionsByProcess: [ownPID: ownAssertions]) { _ in
-                Bundle.main.executableURL?.path
+                "/usr/bin/caffeinate"
             }
         }
 
