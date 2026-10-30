@@ -2,13 +2,14 @@
 
 # Caffeguard
 
-You keep your Mac awake with `caffeinate`, Amphetamine, Raycast or any other keep-awake
-app, so it does not go to sleep. You walk away. Someone sits down at it.
+You keep your Mac awake with `caffeinate`, Amphetamine, KeepingYouAwake, Lungo, Theine,
+Caffeinated or Raycast Coffee, so it does not go to sleep. You walk away. Someone sits
+down at it.
 
 Caffeguard catches them. It lives in your menu bar as a little shield. When your Mac is
 kept awake and nobody has touched it for a few minutes, Caffeguard starts watching through
 your webcam. If someone looks at the camera, it takes their photo, saves it, and turns every
-screen bright red.
+screen into an intrusion alert. The default screen is bright red.
 
 That's it.
 
@@ -29,9 +30,9 @@ That's it.
 2. Walk away.
 3. After 5 minutes (you can change this) of nobody touching the Mac, the shield in the menu bar fills in. It is
    watching now.
-4. If someone sits down and looks at the screen, they get a red screen and you get their
-   photo in `~/Pictures/Caffeguard`.
-5. The red screen only goes away with your fingerprint (Touch ID) or your Mac password.
+4. If someone sits down and looks at the screen, they get an intrusion alert and you get their
+   photo in `~/Pictures/Caffeguard`, or the folder you choose in **Settings… → General**.
+5. The alert only goes away with your fingerprint (Touch ID) or your Mac password.
    Until then it keeps watching: if that person runs off and someone else sits down later,
    you get a photo of them too.
 
@@ -39,11 +40,11 @@ Things to know:
 
 - Typing does not turn it off, because an intruder would type too. Letting the Mac sleep
   again turns it off, and so does unchecking **Enabled** in the menu.
-- It will catch you too when you come back. Unlock the red screen with your fingerprint,
+- It will catch you too when you come back. Unlock the alert with your fingerprint,
   or uncheck **Enabled** before you leave the Mac awake and walk off.
 - One person sitting there is one photo. A new photo needs the seat to be empty for 30
   seconds first.
-- After you unlock the red screen, it waits another quiet period before it watches again.
+- After you unlock the alert, it waits another quiet period before it watches again.
 - Change the camera or the waiting time in **Settings…** from the menu bar shield. The
   waiting time can be anything from 1 second up, under **Custom**.
 - **Settings → Intrusion Screen** has 20 themes for the red screen (Terminal, Crime Scene,
@@ -51,7 +52,44 @@ Things to know:
   also play an alarm and lock the Mac.
 - The menu shows when it last caught someone, with a little photo. Click it to open the photo.
 - Turn on **Open at Login** so it is always running.
+- Choose a photo destination in **Settings… → General**. Changing the folder only affects
+  new photos; existing photos stay where they are. **Show Photos in Finder** opens the
+  selected folder, and the last photo is read from there when the app starts.
 - The camera is off unless it is watching. It never records video.
+
+## Keep-awake apps
+
+Caffeguard detects active macOS requests to prevent system or display sleep, so there
+is nothing to configure for each keep-awake app. These include:
+
+- `caffeinate`, built into macOS.
+- [Amphetamine](https://apps.apple.com/app/amphetamine/id937984704).
+- [KeepingYouAwake](https://keepingyouawake.app/).
+- [Lungo](https://sindresorhus.com/lungo).
+- [Theine](https://appahead.studio/apps/theine/).
+- [Caffeinated by Yugen](https://apps.apple.com/app/id1362171212).
+- [Raycast Coffee](https://www.raycast.com/mooxl/coffee).
+
+Start a keep-awake session that prevents system or display sleep. KeepingYouAwake and
+Raycast Coffee use `caffeinate` underneath and are detected through that process.
+Paused or ended sessions do not count. Apps can be installed outside `/Applications`
+or run through helpers; their names and locations do not need to match a list.
+
+For Raycast Coffee, enable **Prevent system sleep** or **Prevent display sleep**.
+Disk-only assertions and tools that only simulate mouse or keyboard input are not
+supported triggers. Simulated input can also reset the idle timer, delaying arming.
+
+## Intrusion screen
+
+Open **Settings… → Intrusion Screen** to choose from 20 themes, add a wallpaper, and
+write the message shown to an intruder. Leave the message blank to use the selected
+theme’s message. The preview updates as you edit, and your choices are saved for the
+next alert on every connected display.
+
+Choose how to start verification: **Double-click**, **Any key**, or **Double-click or
+any key** (the default). A single click does not start verification. Touch ID or your
+Mac password is required to dismiss the alert; cancelling verification keeps the alert
+visible. If **Lock the Mac** is enabled, logging back in also dismisses the alert.
 
 ## iMessage alerts
 

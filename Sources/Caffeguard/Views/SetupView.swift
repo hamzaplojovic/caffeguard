@@ -19,7 +19,7 @@ struct SetupView: View {
             VStack(spacing: 8) {
                 Text("Welcome to Caffeguard")
                     .font(.title.bold())
-                Text("When your Mac is caffeinated and you step away, Caffeguard photographs anyone who sits down at it.")
+                Text("When an app keeps your Mac awake and you step away, Caffeguard photographs anyone who sits down at it.")
                     .foregroundStyle(.secondary)
             }
             .multilineTextAlignment(.center)

@@ -3,6 +3,8 @@ import SwiftUI
 /// Picks the theme and the optional wallpaper of the intrusion screen, with a live preview.
 struct AlertSettings: View {
     @AppStorage(Preference.theme) private var themeID = Theme.all[0].id
+    @AppStorage(Preference.intrusionMessage) private var intrusionMessage = ""
+    @AppStorage(Preference.intrusionUnlockTrigger) private var intrusionUnlockTrigger = IntrusionUnlockTrigger.doubleClickOrAnyKey
     @State private var wallpaper = Wallpaper.image
     @State private var isChoosingWallpaper = false
     @State private var wallpaperError: String?
@@ -14,7 +16,9 @@ struct AlertSettings: View {
     var body: some View {
         Form {
             Section {
-                IntrusionAlertView(theme: theme, wallpaper: wallpaper)
+                IntrusionAlertView(configuration: IntrusionScreenConfiguration(
+                    themeID: themeID, message: intrusionMessage, unlockTrigger: intrusionUnlockTrigger
+                ), wallpaper: wallpaper)
                     .frame(width: 1440, height: 900)
                     .scaleEffect(0.29)
                     .frame(width: 418, height: 261)
@@ -27,6 +31,18 @@ struct AlertSettings: View {
                         Text(theme.name).tag(theme.id)
                     }
                 }
+            }
+
+            Section {
+                TextField("Message", text: $intrusionMessage, prompt: Text(theme.message), axis: .vertical)
+                    .lineLimit(2...4)
+                Picker("Start verification", selection: $intrusionUnlockTrigger) {
+                    ForEach(IntrusionUnlockTrigger.allCases) { trigger in
+                        Text(trigger.title).tag(trigger)
+                    }
+                }
+            } footer: {
+                Text("Leave the message blank to use the theme’s message. Touch ID or your Mac password is required to dismiss the alert.")
             }
 
             Section {
@@ -55,8 +71,7 @@ struct AlertSettings: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 480)
-        .fixedSize()
+        .frame(width: 480, height: 680)
         .fileImporter(isPresented: $isChoosingWallpaper, allowedContentTypes: [.image]) { result in
             do {
                 try Wallpaper.set(from: result.get())

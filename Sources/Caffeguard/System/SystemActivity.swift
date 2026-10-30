@@ -14,20 +14,33 @@ enum SystemActivity {
     /// `caffeinate` lives, is deliberately not one of them.
     private static let systemFolders = ["/System/Library/", "/usr/libexec/", "/usr/sbin/", "/Library/Apple/"]
 
-    /// True while `caffeinate`, Amphetamine or any other app keeps the Mac from idling to sleep.
+    /// Detects active power assertions, including those owned by a wrapper's caffeinate child.
+    /// Supports Amphetamine, KeepingYouAwake, Lungo, Theine, Caffeinated and Raycast Coffee
+    /// without relying on an app's name or installation location.
     static var isKeptAwake: Bool {
         var byProcess: Unmanaged<CFDictionary>?
         guard IOPMCopyAssertionsByProcess(&byProcess) == kIOReturnSuccess,
               let assertions = byProcess?.takeRetainedValue() as? [NSNumber: [[String: Any]]]
         else { return false }
-        return assertions.contains { pid, held in
+        return isKeptAwake(assertionsByProcess: assertions, processPath: processPath)
+    }
+
+    static func isKeptAwake(
+        assertionsByProcess: [NSNumber: [[String: Any]]],
+        processPath: (pid_t) -> String?
+    ) -> Bool {
+        assertionsByProcess.contains { pid, held in
             let path = processPath(pid.int32Value)
-            return held.contains { keepsMacAwake(assertionType: $0[kIOPMAssertionTypeKey] as? String, processPath: path) }
+            return held.contains { keepsMacAwake(assertion: $0, processPath: path) }
         }
     }
 
-    static func keepsMacAwake(assertionType: String?, processPath: String?) -> Bool {
-        guard let assertionType, let processPath else { return false }
+    static func keepsMacAwake(assertion: [String: Any], processPath: String?) -> Bool {
+        // Apps can pause a session by switching its assertion off without releasing it.
+        guard let assertionType = assertion[kIOPMAssertionTypeKey] as? String,
+              let level = assertion[kIOPMAssertionLevelKey] as? Int,
+              level == kIOPMAssertionLevelOn,
+              let processPath else { return false }
         return keepAwakeTypes.contains(assertionType) && !systemFolders.contains { processPath.hasPrefix($0) }
     }
 

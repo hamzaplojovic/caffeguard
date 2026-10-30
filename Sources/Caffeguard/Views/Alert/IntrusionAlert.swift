@@ -25,15 +25,16 @@ final class IntrusionAlert {
     func show() {
         guard windows.isEmpty else { return }
         previousApp = NSWorkspace.shared.frontmostApplication
-        let theme = Theme.current
+        let configuration = IntrusionScreenConfiguration(defaults: .standard)
         let wallpaper = Wallpaper.image
         windows = NSScreen.screens.map { screen in
-            let window = AlertWindow(contentRect: screen.frame, styleMask: .borderless, backing: .buffered, defer: false)
+            let window = IntrusionAlertWindow(contentRect: screen.frame, styleMask: .borderless, backing: .buffered, defer: false)
             window.level = .screenSaver
             window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
             window.isReleasedWhenClosed = false
-            window.onKey = { [weak self] in self?.unlock() }
-            window.contentView = NSHostingView(rootView: IntrusionAlertView(theme: theme, wallpaper: wallpaper) { [weak self] in self?.unlock() })
+            window.unlockTrigger = configuration.unlockTrigger
+            window.onUnlockRequest = { [weak self] in self?.unlock() }
+            window.contentView = NSHostingView(rootView: IntrusionAlertView(configuration: configuration, wallpaper: wallpaper))
             window.setFrame(screen.frame, display: true)
             window.orderFrontRegardless()
             return window
@@ -84,9 +85,21 @@ final class IntrusionAlert {
     }
 }
 
-/// A borderless window that can take keyboard focus, so a key press starts unlocking.
-private final class AlertWindow: NSWindow {
-    var onKey: () -> Void = {}
+/// Routes input before the hosting view can consume it. Input only requests authentication.
+final class IntrusionAlertWindow: NSWindow {
+    var unlockTrigger: IntrusionUnlockTrigger = .doubleClickOrAnyKey
+    var onUnlockRequest: () -> Void = {}
     override var canBecomeKey: Bool { true }
-    override func keyDown(with event: NSEvent) { onKey() }
+
+    override func sendEvent(_ event: NSEvent) {
+        if event.type == .keyDown {
+            if !event.isARepeat, unlockTrigger.accepts(.keyPress) { onUnlockRequest() }
+            return
+        }
+        if event.type == .leftMouseDown, event.clickCount == 2 {
+            if unlockTrigger.accepts(.doubleClick) { onUnlockRequest() }
+            return
+        }
+        super.sendEvent(event)
+    }
 }

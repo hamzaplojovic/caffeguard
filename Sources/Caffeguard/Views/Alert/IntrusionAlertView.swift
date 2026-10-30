@@ -2,9 +2,10 @@ import SwiftUI
 
 /// The full-screen intrusion message, drawn in a theme over an optional wallpaper.
 struct IntrusionAlertView: View {
-    let theme: Theme
+    let configuration: IntrusionScreenConfiguration
     var wallpaper: NSImage?
-    var unlock: () -> Void = {}
+
+    private var theme: Theme { configuration.theme }
 
     var body: some View {
         VStack(spacing: 24) {
@@ -13,9 +14,13 @@ struct IntrusionAlertView: View {
                 .foregroundStyle(theme.accent)
             Text(theme.title)
                 .font(theme.titleFont(64))
-            Text(theme.message)
+                .lineLimit(2)
+                .minimumScaleFactor(0.5)
+            Text(verbatim: configuration.displayMessage)
                 .font(theme.bodyFont(28))
-            Label("Click or press any key to unlock with Touch ID or your password.", systemImage: "touchid")
+                .lineLimit(8)
+                .minimumScaleFactor(0.5)
+            Label(configuration.unlockTrigger.instruction, systemImage: "lock.shield")
                 .font(theme.bodyFont(18))
                 .opacity(0.7)
                 .padding(.top, 24)
@@ -25,8 +30,6 @@ struct IntrusionAlertView: View {
         .padding(64)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background { background }
-        .contentShape(.rect)
-        .onTapGesture(perform: unlock)
     }
 
     @ViewBuilder private var background: some View {
